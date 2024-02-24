@@ -10,14 +10,12 @@ class LandingController extends Controller
 {
     public function search(Request $request)
     {
-        // $category = Input::get('category', 'default category');
         $query = $request->input('q');
         $rank = $request->input('rank');
 
-        $process = new Process("python query.py indexdb {$rank} \"{$query}\"");
+        $process = new Process(["C:\Users\Huawei Indonesia\AppData\Local\Programs\Python\Python311\python.exe", "query.py", "indexdb", $rank, $query]);
         $process->run();
 
-        // executes after the command finishes
         if (!$process->isSuccessful()) {
             throw new ProcessFailedException($process);
         }
@@ -29,22 +27,23 @@ class LandingController extends Controller
         foreach ($list_data as $book) {
             $dataj =  json_decode($book, true);
             array_push($data, '
-            <div class="col-lg-5">
-                <div class="card mb-2">
-                    <div style="display: flex; flex: 1 1 auto;">
-                        <div class="img-square-wrapper">
-                            <img src="http://books.toscrape.com/' . $dataj['image'] . '">
+            <div class="col-lg-4 col-md-6 col-sm-12 mb-3">
+                <div class="card h-100">
+                    <div class="row g-0 h-100">
+                        <div class="col-4">
+                            <img src="http://books.toscrape.com/' . $dataj['image'] . '" class="img-fluid rounded-start h-100 w-100" alt="' . $dataj['title'] . '">
                         </div>
-                        <div class="card-body">
-                            <h6 class="card-title"><a target="_blank" href="http://books.toscrape.com/catalogue/' . $dataj['url'] . '">' . $dataj['title'] . '</a></h6>
-                            <p class="card-text text-success">Price : ' . $dataj['price'] . '</p>
+                        <div class="col-8">
+                            <div class="card-body d-flex flex-column">
+                                <h5 class="card-title"><a target="_blank" href="http://books.toscrape.com/catalogue/' . $dataj['url'] . '">' . $dataj['title'] . '</a></h5>
+                                <p class="card-text text-success">Price: ' . $dataj['price'] . '</p>
+                            </div>
                         </div>
                     </div>
-                
                 </div>
             </div>
             ');
         }
-        echo json_encode($data);
+        return response()->json($data);
     }
 }
